@@ -2809,7 +2809,7 @@ input, select, textarea {
 		}
 
 			#header header h1, #header header h2, #header header h3, #header header h4, #header header h5, #header header h6, #header header strong, #header header b {
-				color: #ffffff;
+				color: #000000;
 			}
 
 			#header header a {
@@ -2831,7 +2831,7 @@ input, select, textarea {
 				}
 
 			#header header p {
-				color: #ffffff;
+				color: #000000;
 				font-weight: 700;
 				margin: 1.5em 0 0 0;
 			}
