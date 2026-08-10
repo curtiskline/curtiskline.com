@@ -12,6 +12,10 @@
  * This is a starter set based on the site's sections — prune or expand freely.
  */
 export const TAG_VOCABULARY = [
+  // events (Burning Man + regional burns)
+  'burning-man',
+  'interfuse',
+
   // places
   'black-rock-city',
   'nevada',
