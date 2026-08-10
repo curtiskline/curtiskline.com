@@ -1,0 +1,84 @@
+---
+import '../styles/main.scss';
+
+export interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = 'curtiskline.com',
+  description = 'Curtis Kline — technology, entrepreneurship, and business.',
+} = Astro.props;
+
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+---
+
+<!DOCTYPE html>
+<html lang="en" class="is-preload">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+
+    <!-- Open Graph / Twitter -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={new URL('/images/pic01.jpg', Astro.site).href} />
+    <meta name="twitter:card" content="summary_large_image" />
+  </head>
+  <body>
+    <slot />
+
+    <script>
+      // Replaces jquery.scrollex / jquery.scrolly / main.js — no jQuery.
+      const html = document.documentElement;
+
+      // Play initial animations once loaded (mirrors the is-preload removal).
+      window.addEventListener('load', () => {
+        window.setTimeout(() => html.classList.remove('is-preload'), 100);
+      });
+
+      // Per-section fixed backgrounds: fade in the bg whose section is at the
+      // viewport's vertical center (mirrors scrollex `mode: 'middle'`).
+      const sections = document.querySelectorAll<HTMLElement>('.main[data-bg]');
+      if (sections.length) {
+        const bgObserver = new IntersectionObserver(
+          (entries) => {
+            for (const entry of entries) {
+              const id = entry.target.getAttribute('data-bg');
+              const bg = id && document.getElementById(id);
+              if (bg) bg.classList.toggle('active', entry.isIntersecting);
+            }
+          },
+          { rootMargin: '-50% 0px -50% 0px', threshold: 0 }
+        );
+        sections.forEach((s) => bgObserver.observe(s));
+      }
+
+      // Fade the fixed header title out as the header scrolls away
+      // (mirrors the scrollex progress handler, desktop only).
+      const headerTitle = document.querySelector<HTMLElement>('#header > header');
+      const header = document.getElementById('header');
+      if (headerTitle && header) {
+        const mq = window.matchMedia('(min-width: 737px)');
+        const onScroll = () => {
+          if (!mq.matches) {
+            headerTitle.style.opacity = '';
+            return;
+          }
+          // Fully visible at the top, fading to 0 as the header scrolls away.
+          const opacity = 1 - window.scrollY / header.offsetHeight;
+          headerTitle.style.opacity = String(Math.max(0, Math.min(1, opacity)));
+        };
+        window.addEventListener('scroll', onScroll, { passive: true });
+        mq.addEventListener('change', onScroll);
+        onScroll();
+      }
+    </script>
+  </body>
+</html>

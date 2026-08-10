@@ -4,7 +4,6 @@
 @import 'libs/vendor';
 @import 'libs/breakpoints';
 @import 'libs/html-grid';
-@import url('fontawesome-all.min.css');
 @import url("https://fonts.googleapis.com/css?family=Raleway:400,400italic,700,800");
 
 /*
@@ -117,7 +116,7 @@
 	html {
 		background-color:		_palette(accent2, bg);
 		background-attachment:	fixed,						fixed;
-		background-image:		url('images/overlay.png'),	url('../../images/bg.jpg');
+		background-image:		url('/images/overlay.png'),	url('/images/bg.jpg');
 		background-position:	top left,					center center;
 		background-repeat:		repeat,						none;
 		background-size:		auto,						cover;
@@ -734,7 +733,7 @@
 		position: relative;
 
 		&:before {
-			background: url('images/overlay.png');
+			background: url('/images/overlay.png');
 			content: '';
 			display: block;
 			height: 100%;
@@ -1200,7 +1199,7 @@
 		.goto-next {
 			@include vendor('transition', 'background-color #{_duration(transition)} ease-in-out');
 			background-color: _palette(border-bg);
-			background-image: url('images/arrow.svg');
+			background-image: url('/images/arrow.svg');
 			background-position: center center;
 			background-repeat: no-repeat;
 			border-radius: 100%;
@@ -1606,4 +1605,74 @@
 				}
 			}
 
+	}
+/* Inline SVG icons (replaces Font Awesome webfonts) */
+
+	.icon {
+		svg {
+			fill: currentColor;
+			height: 1em;
+			width: 1em;
+			vertical-align: middle;
+		}
+
+		&.major {
+			svg {
+				font-size: 2.5em;
+			}
+		}
+	}
+
+	ul.icons li .icon {
+		svg {
+			font-size: 1.5em;
+		}
+	}
+
+/* Smooth anchor scrolling (replaces jquery.scrolly) */
+
+	html {
+		scroll-behavior: smooth;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		html {
+			scroll-behavior: auto;
+		}
+	}
+
+/* Fixed, centered header title on desktop (replaces the main.js positioning) */
+
+	@include breakpoint('>medium') {
+		#header > header {
+			position: fixed;
+			top: 50%;
+			left: 0;
+			width: 100%;
+			height: auto;
+			transform: translateY(-50%);
+			will-change: opacity;
+		}
+	}
+
+/* Neutralize the Font Awesome loader spinner glyph (font no longer loaded).
+   The overlay fade-out on load is preserved; only the icon glyph is dropped. */
+
+	html body:before {
+		content: '' !important;
+	}
+
+/* Site customization carried over from the hand-edited assets/css/main.css:
+   the header title + tagline were changed from the template's white to black
+   for legibility over the light desert sky. (The SASS source had gone stale;
+   the compiled CSS was the source of truth for the live look.) */
+
+	#header header {
+		h1, h2, h3, h4, h5, h6, strong, b {
+			color: #000000;
+		}
+
+		p {
+			color: #000000;
+		}
 	}

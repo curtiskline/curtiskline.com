@@ -1,0 +1,136 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from '../components/Icon.astro';
+
+const year = new Date().getFullYear();
+
+// Per-section fixed backgrounds. The overlay layer + section photo mirror the
+// two-layer background the original main.js injected at runtime.
+const backgrounds = [
+  { id: 'one-bg', src: '/images/pic01.jpg' },
+  { id: 'two-bg', src: '/images/pic02.jpg' },
+  { id: 'three-bg', src: '/images/pic03.jpg' },
+];
+---
+
+<BaseLayout>
+  {
+    backgrounds.map((bg) => (
+      <div
+        class="main-bg"
+        id={bg.id}
+        style={`background-image: url('/images/overlay.png'), url('${bg.src}');`}
+      />
+    ))
+  }
+
+  <!-- Header -->
+  <section id="header">
+    <header class="major">
+      <h1>Curtis Kline</h1>
+      <p>Technology, entrepreneurship, and business.</p>
+    </header>
+    <div class="container">
+      <ul class="actions special">
+        <li><a href="#one" class="button primary">Learn More</a></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- One -->
+  <section id="one" class="main special" data-bg="one-bg">
+    <div class="container">
+      <div class="content">
+        <header class="major">
+          <h2>Who I am</h2>
+        </header>
+        <p>I'm a tech-focused, entreprenurial thinker. I grew up in Oklahoma and went to college in California. I've lived in Santa Barbara, San Francisco, Oakland, South Lake Tahoe, New York City and (mostly) Tulsa.</p>
+      </div>
+      <a href="#two" class="goto-next">Next</a>
+    </div>
+  </section>
+
+  <!-- Two -->
+  <section id="two" class="main special" data-bg="two-bg">
+    <div class="container">
+      <div class="content">
+        <header class="major">
+          <h2>Stuff I do</h2>
+        </header>
+        <p>I spend much of my time in front of a computer, both at work and for fun. I also have other interests, including Burning Man, photography, camping, and climate change.</p>
+        <ul class="icons-grid">
+          <li>
+            <span class="icon solid major"><Icon name="camera-retro" /></span>
+            <h3>Photography</h3>
+          </li>
+          <li>
+            <span class="icon solid major"><Icon name="caravan" /></span>
+            <h3>Camping</h3>
+          </li>
+          <li>
+            <span class="icon solid major"><Icon name="fire" /></span>
+            <h3>Burning Man</h3>
+          </li>
+          <li>
+            <span class="icon solid major"><Icon name="smog" /></span>
+            <h3>Climate</h3>
+          </li>
+        </ul>
+      </div>
+      <a href="#three" class="goto-next">Next</a>
+    </div>
+  </section>
+
+  <!-- Three -->
+  <section id="three" class="main special" data-bg="three-bg">
+    <div class="container">
+      <div class="content">
+        <header class="major">
+          <h2>Privilege and Equity</h2>
+        </header>
+        <p>I believe in human rights, and I understand the privilege I enjoy in this world that has sheltered me from infringement on my rights. I support people who lack that privilege, including people of color, LGBTQ folks, and people who didn't grow up with financial advantages. I believe we, as a society, need to do a lot more to create environments where these people can be included, have more chances to succeed, and can feel welcome.</p>
+      </div>
+      <a href="#footer" class="goto-next">Next</a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <section id="footer">
+    <div class="container">
+      <header class="major">
+        <h2>Get in touch</h2>
+      </header>
+      <form method="post" action="https://formspree.io/f/xwkywnqg">
+        <div class="row gtr-uniform">
+          <div class="col-6 col-12-xsmall"><input type="text" name="name" id="name" placeholder="Name" /></div>
+          <div class="col-6 col-12-xsmall"><input type="email" name="email" id="email" placeholder="Email" /></div>
+          <div class="col-12"><textarea name="message" id="message" placeholder="Message" rows="4"></textarea></div>
+          <div class="col-12">
+            <ul class="actions special">
+              <li><input type="submit" value="Send Message" class="primary" /></li>
+            </ul>
+          </div>
+        </div>
+      </form>
+    </div>
+    <footer>
+      <ul class="icons">
+        <li>
+          <a href="https://linkedin.com/in/curtiskline" class="icon brands alt" target="_blank" rel="noopener">
+            <Icon name="linkedin" title="LinkedIn" />
+            <span class="label">LinkedIn</span>
+          </a>
+        </li>
+        <li>
+          <a href="https://www.instagram.com/curtiskline/" class="icon brands alt" target="_blank" rel="noopener">
+            <Icon name="instagram" title="Instagram" />
+            <span class="label">Instagram</span>
+          </a>
+        </li>
+      </ul>
+      <ul class="copyright">
+        <li>&copy; {year} Curtis Kline</li><li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
+      </ul>
+    </footer>
+  </section>
+</BaseLayout>
