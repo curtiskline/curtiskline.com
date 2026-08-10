@@ -1,7 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
 import GalleryLayout from '../../layouts/GalleryLayout.astro';
-import PhotoGrid from '../../components/PhotoGrid.astro';
 import { sortByDateDesc } from '../../lib/gallery';
 
 const photos = sortByDateDesc(await getCollection('photos'));
@@ -11,14 +10,6 @@ const photos = sortByDateDesc(await getCollection('photos'));
   title="Photos — curtiskline.com"
   description="Photography by Curtis Kline — Burning Man, camping, travel, and more."
   heading="Photos"
-  count={photos.length}
+  photos={photos}
   activeSection={null}
->
-  {
-    photos.length ? (
-      <PhotoGrid photos={photos} />
-    ) : (
-      <p class="gallery-empty">No photos yet — check back soon.</p>
-    )
-  }
-</GalleryLayout>
+/>

@@ -1,0 +1,37 @@
+---
+import type { Photo } from '../lib/gallery';
+
+interface Props {
+  photos: Photo[];
+}
+
+const { photos } = Astro.props;
+
+// Tags present in this route's photos, most common first.
+const counts = new Map<string, number>();
+for (const p of photos) for (const t of p.data.tags) counts.set(t, (counts.get(t) ?? 0) + 1);
+const tags = [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+---
+
+{
+  tags.length > 0 && (
+    <div class="filter-bar" data-total={photos.length}>
+      <div class="filter-chips" role="group" aria-label="Filter by tag">
+        {tags.map(([tag, count]) => (
+          <button type="button" class="filter-chip" data-tag={tag} aria-pressed="false">
+            {tag}
+            <span class="chip-count">{count}</span>
+          </button>
+        ))}
+      </div>
+      <div class="filter-meta">
+        <p class="filter-status" aria-live="polite" data-filter-status>
+          {photos.length} {photos.length === 1 ? 'photo' : 'photos'}
+        </p>
+        <button type="button" class="filter-clear" data-filter-clear hidden>
+          Clear filters
+        </button>
+      </div>
+    </div>
+  )
+}

@@ -1,0 +1,29 @@
+---
+import { getCollection } from 'astro:content';
+import GalleryLayout from '../../../layouts/GalleryLayout.astro';
+import { tagIndex, type Photo } from '../../../lib/gallery';
+
+export async function getStaticPaths() {
+  const photos = await getCollection('photos');
+  // Only tags with >=3 photos get their own route (avoids a long tail).
+  return [...tagIndex(photos, 3).entries()].map(([tag, list]) => ({
+    params: { tag },
+    props: { tag, photos: list },
+  }));
+}
+
+interface Props {
+  tag: string;
+  photos: Photo[];
+}
+
+const { tag, photos } = Astro.props;
+---
+
+<GalleryLayout
+  title={`#${tag} — curtiskline.com`}
+  description={`Photos tagged ${tag}.`}
+  heading={`#${tag}`}
+  photos={photos}
+  activeSection={null}
+/>

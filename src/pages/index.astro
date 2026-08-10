@@ -1,8 +1,17 @@
 ---
+import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Icon from '../components/Icon.astro';
+import Carousel from '../components/Carousel.astro';
+import { featured, sortByDateDesc } from '../lib/gallery';
 
 const year = new Date().getFullYear();
+
+// Homepage carousel: curated `featured` photos, or the most recent if none are
+// flagged yet, so the gallery always has an entry point once photos exist.
+const allPhotos = await getCollection('photos');
+const feat = featured(allPhotos);
+const carouselPhotos = (feat.length ? feat : sortByDateDesc(allPhotos)).slice(0, 10);
 
 // Per-section fixed backgrounds. The overlay layer + section photo mirror the
 // two-layer background the original main.js injected at runtime.
@@ -94,6 +103,27 @@ const backgrounds = [
     </div>
   </section>
 
+  <!-- Photos -->
+  {
+    carouselPhotos.length > 0 && (
+      <section id="photos">
+        <div class="container">
+          <header class="major">
+            <h2>Photography</h2>
+          </header>
+          <Carousel photos={carouselPhotos} />
+          <ul class="actions special">
+            <li>
+              <a href="/gallery/" class="button primary">
+                View the gallery
+              </a>
+            </li>
+          </ul>
+        </div>
+      </section>
+    )
+  }
+
   <!-- Footer -->
   <section id="footer">
     <div class="container">
@@ -134,3 +164,20 @@ const backgrounds = [
     </footer>
   </section>
 </BaseLayout>
+
+<style is:global>
+  #photos {
+    position: relative;
+    text-align: center;
+    padding: 5em 0;
+  }
+  #photos > .container {
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: inset 0 1px 0 0 #dddddd;
+    padding: 3.5em 2.5em;
+  }
+  #photos .actions {
+    justify-content: center;
+    margin-top: 1.5em;
+  }
+</style>

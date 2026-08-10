@@ -1,0 +1,144 @@
+---
+import { cfImage, cfSrcset, WIDTHS } from '../lib/cfImage';
+import { aspectRatio, type Photo } from '../lib/gallery';
+
+interface Props {
+  photos: Photo[];
+}
+
+const { photos } = Astro.props;
+---
+
+<div class="carousel-wrap">
+  <button type="button" class="carousel-nav prev" aria-label="Scroll left" hidden>‹</button>
+  <ul class="carousel" id="carousel">
+    {
+      photos.map((p) => (
+        <li
+          class="carousel-item"
+          style={`aspect-ratio: ${aspectRatio(p)}; --photo-color: ${p.data.color};`}
+        >
+          <a href={`/gallery/?photo=${p.data.id}`} aria-label={p.data.title ?? p.data.alt}>
+            <img
+              src={cfImage(p.data.key, { width: WIDTHS.grid.at(-1)! })}
+              srcset={cfSrcset(p.data.key, WIDTHS.grid)}
+              sizes="(max-width: 736px) 70vw, 22em"
+              width={p.data.width}
+              height={p.data.height}
+              alt={p.data.alt}
+              loading="lazy"
+              decoding="async"
+            />
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+  <button type="button" class="carousel-nav next" aria-label="Scroll right" hidden>›</button>
+</div>
+
+<script>
+  // CSS scroll-snap carousel — no library. Buttons appear only when the strip
+  // actually overflows, and honor prefers-reduced-motion.
+  const wrap = document.querySelector<HTMLElement>('.carousel-wrap');
+  const track = document.querySelector<HTMLElement>('#carousel');
+  if (wrap && track) {
+    const prev = wrap.querySelector<HTMLButtonElement>('.carousel-nav.prev')!;
+    const next = wrap.querySelector<HTMLButtonElement>('.carousel-nav.next')!;
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+    const overflowing = () => track.scrollWidth > track.clientWidth + 4;
+    const update = () => {
+      const show = overflowing();
+      prev.hidden = !show || track.scrollLeft <= 4;
+      next.hidden = !show || track.scrollLeft + track.clientWidth >= track.scrollWidth - 4;
+    };
+
+    const step = (dir: number) =>
+      track.scrollBy({
+        left: dir * track.clientWidth * 0.8,
+        behavior: reduce.matches ? 'auto' : 'smooth',
+      });
+
+    prev.addEventListener('click', () => step(-1));
+    next.addEventListener('click', () => step(1));
+    track.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update);
+    update();
+  }
+</script>
+
+<style>
+  .carousel-wrap {
+    position: relative;
+    margin: 0 auto 2em;
+  }
+
+  .carousel {
+    display: flex;
+    gap: 12px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .carousel::-webkit-scrollbar {
+    display: none;
+  }
+
+  .carousel-item {
+    flex: 0 0 auto;
+    height: 15em;
+    scroll-snap-align: center;
+    background-color: var(--photo-color, #e8f0f3);
+    overflow: hidden;
+  }
+
+  .carousel-item a {
+    display: block;
+    height: 100%;
+    border-bottom: none;
+  }
+
+  .carousel-item img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .carousel-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
+    width: 2.4em;
+    height: 2.4em;
+    border: 0;
+    border-radius: 100%;
+    background: rgba(255, 255, 255, 0.9);
+    color: #61686b;
+    font-size: 1.2em;
+    line-height: 1;
+    cursor: pointer;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.15);
+  }
+  .carousel-nav.prev {
+    left: 0.4em;
+  }
+  .carousel-nav.next {
+    right: 0.4em;
+  }
+  .carousel-nav[hidden] {
+    display: none;
+  }
+
+  @media (max-width: 736px) {
+    .carousel-item {
+      height: 11em;
+    }
+  }
+</style>

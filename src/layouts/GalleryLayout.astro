@@ -1,22 +1,25 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from './BaseLayout.astro';
+import FilterBar from '../components/FilterBar.astro';
+import PhotoGrid from '../components/PhotoGrid.astro';
+import type { Photo } from '../lib/gallery';
 
 interface Props {
   title: string;
   description?: string;
   heading: string;
-  count: number;
-  /** Section slug for the active nav item, or null on the "all" view. */
+  photos: Photo[];
+  /** Section slug for the active nav item, or null on the "all"/tag views. */
   activeSection?: string | null;
 }
 
-const { title, description, heading, count, activeSection = null } = Astro.props;
+const { title, description, heading, photos, activeSection = null } = Astro.props;
 
 // Nav lists only sections that actually have photos.
-const [photos, sections] = await Promise.all([getCollection('photos'), getCollection('sections')]);
+const [allPhotos, sections] = await Promise.all([getCollection('photos'), getCollection('sections')]);
 const withPhotos = sections
-  .filter((s) => photos.some((p) => p.data.section === s.id))
+  .filter((s) => allPhotos.some((p) => p.data.section === s.id))
   .sort((a, b) => a.data.order - b.data.order);
 ---
 
@@ -25,7 +28,6 @@ const withPhotos = sections
     <div class="container">
       <header class="major gallery-head">
         <h1>{heading}</h1>
-        <p class="gallery-count">{count} {count === 1 ? 'photo' : 'photos'}</p>
       </header>
 
       <nav class="gallery-nav" aria-label="Photo sections">
@@ -44,13 +46,29 @@ const withPhotos = sections
         }
       </nav>
 
-      <slot />
+      {
+        photos.length ? (
+          <>
+            <FilterBar photos={photos} />
+            <PhotoGrid photos={photos} />
+            <p class="filter-empty" hidden>
+              No photos match those filters.{' '}
+              <button type="button" class="filter-empty-clear">
+                Clear filters
+              </button>
+            </p>
+          </>
+        ) : (
+          <p class="gallery-empty">No photos yet — check back soon.</p>
+        )
+      }
     </div>
   </section>
 
   <script>
-    // Route-scoped: PhotoSwipe (and its CSS) only load on gallery pages.
+    // Route-scoped: PhotoSwipe + filtering only load on gallery pages.
     import '../scripts/lightbox.ts';
+    import '../scripts/filter.ts';
   </script>
 </BaseLayout>
 
@@ -71,23 +89,13 @@ const withPhotos = sections
     text-align: center;
   }
 
-  .gallery-count {
-    color: #a8b0b3;
-    font-size: 0.8em;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    margin-top: 0.5em;
-  }
-
   .gallery-nav {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     align-items: center;
     gap: 0.4em 1.1em;
-    margin: 0 0 2.5em;
-    padding-bottom: 2em;
-    border-bottom: solid 1px #dddddd;
+    margin: 0 0 2em;
   }
 
   .gallery-nav a {
@@ -107,6 +115,104 @@ const withPhotos = sections
     color: #dddddd;
   }
 
+  /* Filter bar */
+  .filter-bar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1em;
+    margin: 0 0 2.5em;
+    padding-bottom: 2em;
+    border-bottom: solid 1px #dddddd;
+  }
+
+  .filter-chips {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5em;
+  }
+
+  .filter-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+    padding: 0.35em 0.9em;
+    border: solid 1px #dddddd;
+    border-radius: 2em;
+    background: transparent;
+    color: #6f7577;
+    cursor: pointer;
+    font-size: 0.75em;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transition:
+      background-color 0.15s ease,
+      border-color 0.15s ease,
+      color 0.15s ease;
+  }
+
+  .filter-chip:hover {
+    border-color: #8cd1a8;
+    color: #61686b;
+  }
+
+  .filter-chip[aria-pressed='true'] {
+    background: #8cd1a8;
+    border-color: #8cd1a8;
+    color: #ffffff;
+  }
+
+  .filter-chip .chip-count {
+    font-size: 0.85em;
+    opacity: 0.65;
+  }
+
+  .filter-meta {
+    display: flex;
+    align-items: center;
+    gap: 1.25em;
+  }
+
+  .filter-status {
+    margin: 0;
+    color: #a8b0b3;
+    font-size: 0.75em;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .filter-clear {
+    border: 0;
+    background: none;
+    color: #8cd1a8;
+    cursor: pointer;
+    font-size: 0.75em;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0;
+  }
+
+  .filter-empty,
+  .gallery-empty {
+    text-align: center;
+    color: #a8b0b3;
+    padding: 3em 0;
+  }
+
+  .filter-empty-clear {
+    border: 0;
+    background: none;
+    color: #8cd1a8;
+    cursor: pointer;
+    font: inherit;
+    text-decoration: underline;
+    padding: 0;
+  }
+
+  /* Grid */
   .photo-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -114,7 +220,6 @@ const withPhotos = sections
     gap: 12px;
   }
 
-  /* aspect-ratio + color placeholder are set inline per card → zero CLS. */
   .photo-card {
     position: relative;
     display: block;
@@ -122,6 +227,10 @@ const withPhotos = sections
     border-bottom: none;
     background-color: var(--photo-color, #e8f0f3);
     cursor: zoom-in;
+  }
+
+  .photo-card.is-hidden {
+    display: none;
   }
 
   .photo-card img {
@@ -143,13 +252,7 @@ const withPhotos = sections
     }
   }
 
-  .gallery-empty {
-    text-align: center;
-    color: #a8b0b3;
-    padding: 3em 0;
-  }
-
-  /* PhotoSwipe caption */
+  /* PhotoSwipe caption + clickable tags */
   .pswp-caption {
     position: absolute;
     left: 0;
@@ -159,12 +262,29 @@ const withPhotos = sections
     text-align: center;
     pointer-events: none;
   }
-  .pswp-caption span {
-    display: inline-block;
+  .pswp-caption .cap-text {
+    display: block;
     max-width: 46em;
+    margin: 0 auto 0.4em;
     color: #fff;
     font-size: 0.85em;
     line-height: 1.5;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+  }
+  .pswp-caption .cap-tags {
+    display: inline-flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.75em;
+  }
+  .pswp-caption .cap-tags a {
+    pointer-events: auto;
+    color: #8cd1a8;
+    border-bottom: none;
+    font-size: 0.75em;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
   }
 

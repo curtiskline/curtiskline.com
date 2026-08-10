@@ -7,7 +7,9 @@ if (grid) {
 
   const lightbox = new PhotoSwipeLightbox({
     gallery: '#photo-grid',
-    children: 'a.photo-card',
+    // Exclude cards hidden by the tag filter so the lightbox only steps through
+    // what's currently visible (PhotoSwipe re-queries this on each open).
+    children: 'a.photo-card:not(.is-hidden)',
     pswpModule: () => import('photoswipe'),
     // Largest served candidate; PhotoSwipe generates `sizes` and re-adjusts on zoom.
     showHideAnimationType: reduceMotion ? 'none' : 'zoom',
@@ -30,7 +32,15 @@ if (grid) {
           const anchor = lightbox.pswp!.currSlide?.data.element as HTMLAnchorElement | undefined;
           const img = anchor?.querySelector('img');
           const text = anchor?.dataset.caption || img?.alt || '';
-          el.innerHTML = text ? `<span>${esc(text)}</span>` : '';
+          const tags = (anchor?.dataset.tags || '').split(',').filter(Boolean);
+          // Tags link back into the filtered gallery (route always exists,
+          // unlike the >=3-photo tag routes).
+          const tagsHtml = tags
+            .map((t) => `<a href="/gallery/?tags=${encodeURIComponent(t)}">#${esc(t)}</a>`)
+            .join('');
+          el.innerHTML =
+            (text ? `<span class="cap-text">${esc(text)}</span>` : '') +
+            (tagsHtml ? `<span class="cap-tags">${tagsHtml}</span>` : '');
         });
       },
     });

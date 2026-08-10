@@ -1,7 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
 import GalleryLayout from '../../layouts/GalleryLayout.astro';
-import PhotoGrid from '../../components/PhotoGrid.astro';
 import { inSection, type Photo, type Section } from '../../lib/gallery';
 
 export async function getStaticPaths() {
@@ -26,8 +25,6 @@ const { section, photos } = Astro.props;
   title={`${section.data.title} — curtiskline.com`}
   description={section.data.description}
   heading={section.data.title}
-  count={photos.length}
+  photos={photos}
   activeSection={section.id}
->
-  <PhotoGrid photos={photos} />
-</GalleryLayout>
+/>

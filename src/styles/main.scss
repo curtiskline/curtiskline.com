@@ -1676,3 +1676,10 @@
 			color: #000000;
 		}
 	}
+
+/* Normalize: honor the [hidden] attribute (the HTML5 UP reset omitted it, so
+   button/element display rules were winning over the UA hidden rule). */
+
+	[hidden] {
+		display: none !important;
+	}
