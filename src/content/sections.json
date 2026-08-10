@@ -1,0 +1,32 @@
+[
+  {
+    "id": "burning-man",
+    "title": "Burning Man",
+    "description": "Black Rock City — the playa, the art, the people.",
+    "order": 1
+  },
+  {
+    "id": "camping",
+    "title": "Camping",
+    "description": "Nights out under canvas and open sky.",
+    "order": 2
+  },
+  {
+    "id": "travel",
+    "title": "Travel",
+    "description": "Places I've wandered through.",
+    "order": 3
+  },
+  {
+    "id": "portraits",
+    "title": "Portraits",
+    "description": "People, up close.",
+    "order": 4
+  },
+  {
+    "id": "misc",
+    "title": "Miscellaneous",
+    "description": "Everything else worth keeping.",
+    "order": 5
+  }
+]
