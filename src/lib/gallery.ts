@@ -48,3 +48,13 @@ export function tagIndex(photos: Photo[], min = 3): Map<string, Photo[]> {
 export function aspectRatio(photo: Photo): string {
   return `${photo.data.width} / ${photo.data.height}`;
 }
+
+/**
+ * The dimensions PhotoSwipe should use for a photo — the largest served size
+ * (the lightbox `cap`, or the original if smaller), height kept proportional.
+ */
+export function pswpDimensions(photo: Photo, cap = 2400): { width: number; height: number } {
+  const width = Math.min(cap, photo.data.width);
+  const height = Math.round((width * photo.data.height) / photo.data.width);
+  return { width, height };
+}

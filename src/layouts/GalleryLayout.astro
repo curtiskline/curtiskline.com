@@ -1,0 +1,180 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from './BaseLayout.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+  heading: string;
+  count: number;
+  /** Section slug for the active nav item, or null on the "all" view. */
+  activeSection?: string | null;
+}
+
+const { title, description, heading, count, activeSection = null } = Astro.props;
+
+// Nav lists only sections that actually have photos.
+const [photos, sections] = await Promise.all([getCollection('photos'), getCollection('sections')]);
+const withPhotos = sections
+  .filter((s) => photos.some((p) => p.data.section === s.id))
+  .sort((a, b) => a.data.order - b.data.order);
+---
+
+<BaseLayout title={title} description={description}>
+  <section id="gallery">
+    <div class="container">
+      <header class="major gallery-head">
+        <h1>{heading}</h1>
+        <p class="gallery-count">{count} {count === 1 ? 'photo' : 'photos'}</p>
+      </header>
+
+      <nav class="gallery-nav" aria-label="Photo sections">
+        <a href="/" class="gallery-home">← Home</a>
+        <span class="gallery-nav-sep" aria-hidden="true">|</span>
+        <a href="/gallery/" class:list={['gallery-nav-link', { active: activeSection === null }]}>All</a>
+        {
+          withPhotos.map((s) => (
+            <a
+              href={`/gallery/${s.id}/`}
+              class:list={['gallery-nav-link', { active: activeSection === s.id }]}
+            >
+              {s.data.title}
+            </a>
+          ))
+        }
+      </nav>
+
+      <slot />
+    </div>
+  </section>
+
+  <script>
+    // Route-scoped: PhotoSwipe (and its CSS) only load on gallery pages.
+    import '../scripts/lightbox.ts';
+  </script>
+</BaseLayout>
+
+<style is:global>
+  #gallery {
+    position: relative;
+    min-height: 100vh;
+    padding: 5em 0;
+  }
+
+  #gallery > .container {
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow: inset 0 1px 0 0 #dddddd;
+    padding: 3.5em 2.5em;
+  }
+
+  .gallery-head {
+    text-align: center;
+  }
+
+  .gallery-count {
+    color: #a8b0b3;
+    font-size: 0.8em;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-top: 0.5em;
+  }
+
+  .gallery-nav {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 0.4em 1.1em;
+    margin: 0 0 2.5em;
+    padding-bottom: 2em;
+    border-bottom: solid 1px #dddddd;
+  }
+
+  .gallery-nav a {
+    border-bottom: none;
+    color: #6f7577;
+    font-size: 0.8em;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .gallery-nav .gallery-nav-link.active {
+    color: #8cd1a8;
+  }
+
+  .gallery-nav .gallery-nav-sep {
+    color: #dddddd;
+  }
+
+  .photo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    grid-auto-flow: dense;
+    gap: 12px;
+  }
+
+  /* aspect-ratio + color placeholder are set inline per card → zero CLS. */
+  .photo-card {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    border-bottom: none;
+    background-color: var(--photo-color, #e8f0f3);
+    cursor: zoom-in;
+  }
+
+  .photo-card img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+
+  .photo-card img.is-loaded {
+    opacity: 1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .photo-card img {
+      transition: none;
+    }
+  }
+
+  .gallery-empty {
+    text-align: center;
+    color: #a8b0b3;
+    padding: 3em 0;
+  }
+
+  /* PhotoSwipe caption */
+  .pswp-caption {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 1em 1.25em calc(1em + env(safe-area-inset-bottom));
+    text-align: center;
+    pointer-events: none;
+  }
+  .pswp-caption span {
+    display: inline-block;
+    max-width: 46em;
+    color: #fff;
+    font-size: 0.85em;
+    line-height: 1.5;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+  }
+
+  @media (max-width: 480px) {
+    #gallery > .container {
+      padding: 2.5em 1.25em;
+    }
+    .photo-grid {
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 8px;
+    }
+  }
+</style>

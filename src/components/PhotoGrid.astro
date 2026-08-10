@@ -1,0 +1,14 @@
+---
+import PhotoCard from './PhotoCard.astro';
+import type { Photo } from '../lib/gallery';
+
+interface Props {
+  photos: Photo[];
+}
+
+const { photos } = Astro.props;
+---
+
+<div id="photo-grid" class="photo-grid">
+  {photos.map((photo, i) => <PhotoCard photo={photo} eager={i < 4} />)}
+</div>

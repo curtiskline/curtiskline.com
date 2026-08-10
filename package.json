@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "astro": "^5.0.0",
+    "photoswipe": "^5.4.4",
     "zod": "^3.25.76"
   },
   "devDependencies": {

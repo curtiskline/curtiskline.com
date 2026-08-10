@@ -1,0 +1,33 @@
+---
+import { getCollection } from 'astro:content';
+import GalleryLayout from '../../layouts/GalleryLayout.astro';
+import PhotoGrid from '../../components/PhotoGrid.astro';
+import { inSection, type Photo, type Section } from '../../lib/gallery';
+
+export async function getStaticPaths() {
+  const [photos, sections] = await Promise.all([getCollection('photos'), getCollection('sections')]);
+  return sections
+    .filter((s) => photos.some((p) => p.data.section === s.id))
+    .map((section) => ({
+      params: { section: section.id },
+      props: { section, photos: inSection(photos, section.id) },
+    }));
+}
+
+interface Props {
+  section: Section;
+  photos: Photo[];
+}
+
+const { section, photos } = Astro.props;
+---
+
+<GalleryLayout
+  title={`${section.data.title} — curtiskline.com`}
+  description={section.data.description}
+  heading={section.data.title}
+  count={photos.length}
+  activeSection={section.id}
+>
+  <PhotoGrid photos={photos} />
+</GalleryLayout>

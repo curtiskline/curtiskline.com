@@ -1,0 +1,48 @@
+---
+import { cfImage, cfSrcset, WIDTHS } from '../lib/cfImage';
+import { pswpDimensions, aspectRatio, type Photo } from '../lib/gallery';
+
+interface Props {
+  photo: Photo;
+  /** Eager-load (no lazy) — use for the first row so LCP isn't deferred. */
+  eager?: boolean;
+}
+
+const { photo, eager = false } = Astro.props;
+const d = photo.data;
+const pswp = pswpDimensions(photo);
+
+// href doubles as the no-JS fallback (clicking opens the full image) and the
+// PhotoSwipe large source; data-pswp-srcset lets PhotoSwipe pick per zoom/DPR.
+const href = cfImage(d.key, { width: WIDTHS.lightbox.at(-1)! });
+const thumb = cfImage(d.key, { width: WIDTHS.grid.at(-1)! });
+
+// Must track the real grid column widths per breakpoint or the browser fetches
+// the wrong candidate. Mirrors the .photo-grid columns in GalleryLayout.
+const gridSizes = '(max-width: 480px) 100vw, (max-width: 736px) 50vw, (max-width: 980px) 33vw, 25vw';
+---
+
+<a
+  class="photo-card"
+  href={href}
+  data-pswp-id={d.id}
+  data-pswp-width={pswp.width}
+  data-pswp-height={pswp.height}
+  data-pswp-srcset={cfSrcset(d.key, WIDTHS.lightbox)}
+  data-caption={d.caption ?? d.title ?? ''}
+  data-tags={d.tags.join(',')}
+  target="_blank"
+  rel="noopener"
+  style={`aspect-ratio: ${aspectRatio(photo)}; --photo-color: ${d.color};`}
+>
+  <img
+    src={thumb}
+    srcset={cfSrcset(d.key, WIDTHS.grid)}
+    sizes={gridSizes}
+    width={d.width}
+    height={d.height}
+    alt={d.alt}
+    loading={eager ? 'eager' : 'lazy'}
+    decoding="async"
+  />
+</a>
