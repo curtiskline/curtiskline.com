@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { isValidTag } from './tags.mjs';
 
 /**
  * Canonical photo schema — the single source of truth shared by the Astro
@@ -16,7 +17,15 @@ export const photoSchema = z.object({
   title: z.string().optional(),
   caption: z.string().optional(),
   alt: z.string().min(1), // REQUIRED — accessibility
-  tags: z.array(z.string()).default([]),
+  // Controlled vocabulary — see src/content/tags.mjs. An unknown tag fails the
+  // build so tag drift can't creep in across hundreds of photos.
+  tags: z
+    .array(
+      z.string().refine(isValidTag, (t) => ({
+        message: `Unknown tag "${t}". Add it to src/content/tags.mjs or fix the spelling.`,
+      }))
+    )
+    .default([]),
   date: z.coerce.date().optional(), // from EXIF DateTimeOriginal
   width: z.number().int().positive(), // REQUIRED by PhotoSwipe
   height: z.number().int().positive(), // REQUIRED by PhotoSwipe

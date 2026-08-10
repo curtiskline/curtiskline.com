@@ -20,6 +20,7 @@ import { basename, extname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
 import exifr from 'exifr';
+import { isValidTag, TAG_VOCABULARY } from '../src/content/tags.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const MAX_EDGE = 4000; // R2 storage + PhotoSwipe ceiling; downscale before upload
@@ -36,13 +37,17 @@ function parseArgs(argv) {
     if (a === '--dry-run') args.dryRun = true;
     else if (a === '--section') args.section = argv[++i];
     else if (a === '--dir') args.dir = argv[++i];
+    else if (a === '--tags') args.tags = argv[++i];
     else if (a === '--help' || a === '-h') args.help = true;
     else console.warn(`Ignoring unknown argument: ${a}`);
   }
   return args;
 }
 
-const USAGE = `Usage: node scripts/ingest.mjs --section <slug> --dir <path> [--dry-run]`;
+const USAGE = `Usage: node scripts/ingest.mjs --section <slug> --dir <path> [--tags a,b,c] [--dry-run]
+
+  --tags   Comma-separated tags applied to every photo in this batch. Each must
+           be in the controlled vocabulary (src/content/tags.mjs) or a 4-digit year.`;
 
 // ----------------------------------------------------------------------------
 // helpers
@@ -179,6 +184,21 @@ async function main() {
     process.exit(1);
   }
 
+  // Validate --tags against the controlled vocabulary up front.
+  const batchTags = (args.tags ?? '')
+    .split(',')
+    .map((t) => t.trim())
+    .filter(Boolean);
+  const badTags = batchTags.filter((t) => !isValidTag(t));
+  if (badTags.length) {
+    console.error(
+      `Unknown tag(s): ${badTags.join(', ')}\n` +
+        `Add them to src/content/tags.mjs (kebab-case, singular) or fix the spelling.\n` +
+        `Known tags: ${TAG_VOCABULARY.join(', ')}`
+    );
+    process.exit(1);
+  }
+
   const sectionTitles = await loadSectionTitles();
   if (!sectionTitles.has(args.section)) {
     console.warn(`⚠ Section "${args.section}" is not in sections.json — add it there before building.`);
@@ -225,7 +245,7 @@ async function main() {
       // Stub alt so the build passes; every stubbed photo is flagged below for a
       // real alt-text pass. Screen readers deserve better than this placeholder.
       alt: `Photograph from the ${sectionTitle} collection`,
-      tags: [],
+      tags: batchTags,
       ...(img.date ? { date: img.date.toISOString() } : {}),
       width: img.width,
       height: img.height,
