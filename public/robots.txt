@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://curtiskline.com/sitemap-index.xml

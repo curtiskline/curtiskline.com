@@ -18,8 +18,9 @@ const href = cfImage(d.key, { width: WIDTHS.lightbox.at(-1)! });
 const thumb = cfImage(d.key, { width: WIDTHS.grid.at(-1)! });
 
 // Must track the real grid column widths per breakpoint or the browser fetches
-// the wrong candidate. Mirrors the .photo-grid columns in GalleryLayout.
-const gridSizes = '(max-width: 480px) 100vw, (max-width: 736px) 50vw, (max-width: 980px) 33vw, 25vw';
+// the wrong candidate. Mirrors the .photo-grid columns in GalleryLayout
+// (~2 cols on phones, ~3–4 on tablets, fixed ~220px cells on desktop).
+const gridSizes = '(max-width: 480px) 47vw, (max-width: 736px) 31vw, (max-width: 980px) 23vw, 220px';
 ---
 
 <a
@@ -43,6 +44,7 @@ const gridSizes = '(max-width: 480px) 100vw, (max-width: 736px) 50vw, (max-width
     height={d.height}
     alt={d.alt}
     loading={eager ? 'eager' : 'lazy'}
+    fetchpriority={eager ? 'high' : undefined}
     decoding="async"
   />
 </a>

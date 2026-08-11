@@ -1,0 +1,40 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Not found — curtiskline.com" description="Page not found.">
+  <section id="notfound">
+    <div class="container">
+      <header class="major">
+        <h1>404</h1>
+        <p>That page wandered off the playa.</p>
+      </header>
+      <ul class="actions special">
+        <li><a href="/" class="button primary">Home</a></li>
+        <li><a href="/gallery/" class="button">Photos</a></li>
+      </ul>
+    </div>
+  </section>
+</BaseLayout>
+
+<style is:global>
+  #notfound {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    text-align: center;
+    padding: 5em 0;
+  }
+  #notfound > .container {
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: inset 0 1px 0 0 #dddddd;
+    padding: 3.5em 2.5em;
+  }
+  #notfound h1 {
+    font-size: 3em;
+  }
+  #notfound .actions {
+    justify-content: center;
+  }
+</style>

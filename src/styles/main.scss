@@ -4,7 +4,8 @@
 @import 'libs/vendor';
 @import 'libs/breakpoints';
 @import 'libs/html-grid';
-@import url("https://fonts.googleapis.com/css?family=Raleway:400,400italic,700,800");
+// Raleway is loaded via a preconnected <link rel="stylesheet"> in BaseLayout
+// (with display=swap) instead of a render-blocking CSS @import.
 
 /*
 	Highlights by HTML5 UP
