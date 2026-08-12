@@ -103,6 +103,17 @@ Cloudflare Workers Builds is connected to this repo and deploys `main` automatic
 The Worker name in `wrangler.jsonc` is `curtiskline-github-io` and must stay that way —
 it's the Worker the apex domain is routed to. It does not follow a repo rename.
 
+Verify a push actually deployed — the repo connection has silently dropped before,
+leaving pushes with no build and the previous version still live:
+
+```bash
+npx wrangler deployments list --name curtiskline-github-io
+```
+
+The newest entry should be newer than your push. If it isn't, check
+**Workers & Pages → curtiskline-github-io → Settings → Builds** for a disconnected
+repo or a failed build.
+
 ---
 
 ## Docs
