@@ -43,7 +43,7 @@ Everything is on the Cloudflare account that manages the domain. **`wrangler` mu
 Notes:
 - Transformations verified: `format=auto` serves AVIF/WebP; the 400/800/1200/2400 ladder all return 200.
 - Image Transformations were enabled **in the dashboard** — the `wrangler` OAuth token lacks the scope to toggle zone settings via API.
-- `wrangler.jsonc` sets `name: "curtiskline-com"`, but the deployed Worker is named `curtiskline-github-io` (Workers Builds named it from the repo). Non-blocking, but reconcile if you ever `wrangler deploy` locally — it would target `curtiskline-com` and create a *second* Worker. Align the name before doing local deploys.
+- `wrangler.jsonc` sets `name: "curtiskline-github-io"` — this **must** match the Worker that Workers Builds created from the repo name, which is the one the apex is routed to. It previously read `curtiskline-com` (a Worker that never existed); a local `wrangler deploy` would have created a *second*, unrouted Worker. If the repo is ever renamed, the Worker name does **not** follow — leave this field alone unless you also rename the Worker.
 
 **Secrets are NOT in the repo.** `ingest.mjs` needs R2 S3 credentials in `.env` (gitignored). See §5.
 

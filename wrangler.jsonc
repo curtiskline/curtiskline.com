@@ -1,5 +1,7 @@
 {
-  "name": "curtiskline-com",
+  // Must match the Worker that Workers Builds created from the repo name.
+  // Renaming this would deploy to a second, unrouted Worker.
+  "name": "curtiskline-github-io",
   "compatibility_date": "2026-08-01",
   "assets": {
     "directory": "./dist",
