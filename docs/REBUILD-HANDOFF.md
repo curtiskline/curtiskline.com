@@ -5,6 +5,11 @@
 **Repo:** `curtiskline.github.io` → will be renamed/repurposed; site served from Cloudflare
 **Live domain:** curtiskline.com
 
+> **Historical.** This is the plan as written before the rebuild, preserved unedited —
+> the rebuild is done and the repo has since been renamed to `curtiskline.com`. For
+> what was actually built and how to work on it, read
+> [`REBUILD-STATUS.md`](./REBUILD-STATUS.md).
+
 ---
 
 ## 1. Objective

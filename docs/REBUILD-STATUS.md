@@ -9,7 +9,7 @@
 
 ## 1. TL;DR — where things stand
 
-All five phases from the handoff are **built, committed, and on `main`**. The site is **deployed and verified on a Cloudflare Worker preview URL**. The only thing left is finishing the DNS cutover and post-cutover cleanup.
+All five phases from the handoff are **built, committed, and on `main`**, and the **cutover is complete** — `curtiskline.com` is served by the Cloudflare Worker, GitHub Pages is deleted, and the repo has been renamed to `curtiskline.com`. What's left is content: four empty sections and the accent-contrast decision (§7).
 
 | Phase | Status |
 |---|---|
@@ -18,11 +18,10 @@ All five phases from the handoff are **built, committed, and on `main`**. The si
 | 3 — Gallery core (routes, grid, PhotoSwipe) | ✅ done |
 | 4 — Filters, tag routes, homepage carousel | ✅ done |
 | 5 — Favicon/OG/sitemap/robots/404 + perf | ✅ done |
-| Cutover (deploy → flip DNS → retire Pages) | 🔶 **in progress** |
+| Cutover (deploy → flip DNS → retire Pages) | ✅ done |
 
-**Live preview:** https://curtiskline-github-io.prime-561.workers.dev (verified: all routes 200, custom 404, gallery images load from the transform CDN, zero console errors).
-
-**In flight:** DNS for `curtiskline.com` is being pointed at the Worker. Until that propagates, GitHub Pages still "owns" the apex and now serves 404 (main no longer has a root `index.html` — that's expected and accepted).
+**Live:** https://curtiskline.com — all routes 200, custom 404, gallery images load from the transform CDN.
+**Worker preview:** https://curtiskline-github-io.prime-561.workers.dev (still valid; useful for testing a deploy before checking the apex).
 
 ---
 
@@ -116,15 +115,15 @@ wrangler.jsonc                # static-assets Worker config (serves ./dist)
 astro.config.mjs             # site, static output, @astrojs/sitemap, SASS deprecation silencing
 ```
 
-Kept from the old site: `LICENSE.txt` + the HTML5 UP footer attribution (CCA 3.0 requires it). `CNAME` is still present — **delete it at cutover** (GitHub Pages artifact).
+Kept from the old site: `LICENSE.txt` + the HTML5 UP footer attribution (CCA 3.0 requires it). `CNAME` was deleted at cutover (a GitHub Pages artifact with no meaning on Cloudflare).
 
 ---
 
 ## 5. How to work on it (new machine setup)
 
 ```bash
-git clone https://github.com/curtiskline/curtiskline.github.io.git
-cd curtiskline.github.io
+git clone https://github.com/curtiskline/curtiskline.com.git
+cd curtiskline.com
 npm install            # Node 26 used here; Astro 5.18. If sharp/esbuild binaries
                        # don't install, allow install scripts (npm approve-scripts).
 npm run dev            # local dev server
@@ -159,6 +158,13 @@ node scripts/gen-assets.mjs
 
 ## 6. Gotchas (things that bit us / non-obvious)
 
+- **Workers Builds can silently disconnect from the repo.** It happened once: two pushes
+  to `main` produced no build at all while the previous version stayed live — no error,
+  no failed build, just nothing. Don't assume a push deployed. Check:
+  `npx wrangler deployments list --name curtiskline-github-io` — the newest entry should
+  be newer than your push (a healthy build lands in ~30s). The `Source` column is *not* a
+  useful signal; git-triggered builds and manual uploads both show `Upload` /
+  `Unknown (deployment)` authored by the account owner. Compare timestamps, not sources.
 - **`wrangler r2 object put/delete` defaults to LOCAL** storage — pass `--remote` to touch the real bucket.
 - **`ingest.mjs` reuses the schema**; an invalid tag or empty alt fails `npm run build`, not just ingest.
 - **The `photos` collection warns "collection is empty"** until at least one photo is ingested — harmless.
@@ -171,11 +177,22 @@ node scripts/gen-assets.mjs
 
 ## 7. What's left
 
-**Finish cutover (Cloudflare/GitHub, mostly done by Curtis):**
-- [ ] `curtiskline.com` DNS → the Worker (add apex as a Worker custom domain). *In progress.*
-- [ ] After apex is live, re-verify on `curtiskline.com` (routes, gallery, lightbox, deep links, `img.curtiskline.com` same-origin `onerror` fallback — only fully applies on the apex).
-- [ ] Disable GitHub Pages; delete `CNAME`.
-- [ ] (Optional) rename the repo away from `curtiskline.github.io`.
+**Cutover — done (2026-08-11):**
+- [x] `curtiskline.com` DNS → the Worker (apex added as a Worker custom domain).
+- [x] `CNAME` deleted.
+- [x] GitHub Pages deleted. This *required* the repo rename below: Pages cannot be
+      disabled on a `<user>.github.io` repo (the API returns 422), and "unpublish"
+      leaves the source binding intact, so every push kept triggering a failing
+      legacy Jekyll build. Renaming made it an ordinary project site, which deletes.
+- [x] Repo renamed `curtiskline.github.io` → **`curtiskline.com`**. Note the Cloudflare
+      Worker is still named `curtiskline-github-io` and does **not** follow the rename —
+      see §2. Update your remote: `git remote set-url origin
+      https://github.com/curtiskline/curtiskline.com.git`.
+
+Still worth doing:
+- [ ] Manual pass on the apex that curl can't cover: lightbox, keyboard traversal,
+      deep links (`?photo=<id>` cold load), and the `img.curtiskline.com` `onerror`
+      fallback (only fully applies on the apex).
 
 **Product / content:**
 - [ ] Decide the green-button contrast question (§3).
